@@ -1,12 +1,11 @@
-// Função para carregar apenas os domingos válidos do mês atual no select
 function carregarDomingosDoMes() {
     const select = document.getElementById('dataSelect');
     if (!select) return;
 
-    select.innerHTML = ''; // Limpa antes de gerar
+    select.innerHTML = '';
 
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0); // Zera as horas para comparar apenas os dias
+    hoje.setHours(0, 0, 0, 0);
 
     const anoAtual = hoje.getFullYear();
     const mesAtual = hoje.getMonth();
@@ -16,7 +15,6 @@ function carregarDomingosDoMes() {
     for (let dia = 1; dia <= totalDiasNoMes; dia++) {
         const data = new Date(anoAtual, mesAtual, dia);
 
-        // Se for domingo (0) e a data for igual ou depois de hoje
         if (data.getDay() === 0 && data >= hoje) {
             const valorData = data.toISOString().split('T')[0];
 
@@ -32,7 +30,6 @@ function carregarDomingosDoMes() {
     }
 }
 
-// Função para registrar a chamada e salvar na memória do navegador
 function registrarChamada() {
     const selectData = document.getElementById('dataSelect');
     const dataSelecionada = selectData ? selectData.value : 'Data não informada';
@@ -55,10 +52,8 @@ function registrarChamada() {
         dataHoraEnvio: new Date().toLocaleString('pt-BR')
     };
 
-    // Pega os registros antigos ou cria uma lista vazia
     const registrosAntigos = JSON.parse(localStorage.getItem('registrosChamada')) || [];
 
-    // Adiciona ou atualiza o registro da mesma data para evitar duplicatas do mesmo dia
     const indexExistente = registrosAntigos.findIndex(r => r.dataId === dataSelecionada);
     if (indexExistente >= 0) {
         registrosAntigos[indexExistente] = novoRegistro;
@@ -66,16 +61,19 @@ function registrarChamada() {
         registrosAntigos.push(novoRegistro);
     }
 
-    // Salva no localStorage
     localStorage.setItem('registrosChamada', JSON.stringify(registrosAntigos));
 
     alert("Chamada registrada com sucesso para " + listaPresenca.length + " aluno(s)!");
-    
-    // Opcional: redireciona para a página de registros automaticamente
-    // window.location.href = 'registro.html';
+
+    checkboxesMarcados.forEach((caixa) => {
+        caixa.checked = false;
+    });
+
+    if (selectData && selectData.options.length > 0) {
+        selectData.selectedIndex = 0;
+    }
 }
 
-// Inicializa as funções quando a página carregar
 document.addEventListener("DOMContentLoaded", () => {
     carregarDomingosDoMes();
 
@@ -85,70 +83,135 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-
-//REGISTROS 
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('containerRegistros');
     if (!container) return;
 
-    const TOTAL_ALUNOS = 70;
-    const registros = JSON.parse(localStorage.getItem('registrosChamada')) || [];
+    const nomesAlunos = {
+        
+    };
 
-    if (registros.length === 0) {
-        container.innerHTML = '<p>Nenhum registro encontrado ainda.</p>';
-        return;
+    function obterFormatado(numero) {
+        const nome = nomesAlunos[numero] || "Name";
+        return `${numero} ${nome}`;
     }
 
-    container.innerHTML = '';
+    const TOTAL_ALUNOS = 70;
 
-    // Ordena os registros por data
-    registros.sort((a, b) => new Date(a.dataId) - new Date(b.dataId));
+    function carregarTelaRegistros() {
+        const registros = JSON.parse(localStorage.getItem('registrosChamada')) || [];
 
-    // Percorre cada registro e cria uma DIV separada para cada domingo
-    registros.forEach((reg) => {
-        const divDomingo = document.createElement('div');
-        divDomingo.className = 'card-domingo';
-        divDomingo.style.border = '1px solid #ccc';
-        divDomingo.style.padding = '15px';
-        divDomingo.style.marginBottom = '20px';
-        divDomingo.style.borderRadius = '8px';
-
-        const titulo = document.createElement('h3');
-        titulo.textContent = `Domingo: ${reg.dataTexto}`;
-
-        // 1 e 2. Presentes e Proporção
-        const totalPresentes = reg.presentes.length;
-        const proporcaoPresentes = `${totalPresentes}/${TOTAL_ALUNOS}`;
-        
-        const infoPresentes = document.createElement('p');
-        infoPresentes.innerHTML = `<strong>1. Presentes (${proporcaoPresentes}):</strong> ${totalPresentes > 0 ? reg.presentes.join(', ') : 'Nenhum'}`;
-
-        // 3. Descobrir ausentes comparando com o total de 70
-        const ausentes = [];
-        for (let i = 1; i <= TOTAL_ALUNOS; i++) {
-            if (!reg.presentes.includes(String(i))) {
-                ausentes.push(i);
-            }
+        if (registros.length === 0) {
+            container.innerHTML = '<p>Nenhum registro encontrado ainda.</p>';
+            return;
         }
 
-        // 4. Ausentes e Proporção
-        const totalAusentes = ausentes.length;
-        const proporcaoAusentes = `${totalAusentes}/${TOTAL_ALUNOS}`;
+        container.innerHTML = '';
 
-        const infoAusentes = document.createElement('p');
-        infoAusentes.innerHTML = `<strong>3. Ausentes (${proporcaoAusentes}):</strong> ${ausentes.join(', ')}`;
+        registros.sort((a, b) => new Date(a.dataId) - new Date(b.dataId));
 
-        const infoEnvio = document.createElement('p');
-        infoEnvio.style.fontSize = '0.85em';
-        infoEnvio.style.color = '#666';
-        infoEnvio.innerHTML = `<em>Enviado em: ${reg.dataHoraEnvio}</em>`;
+        registros.forEach((reg) => {
+            const divDomingo = document.createElement('div');
+            divDomingo.className = 'card-domingo';
+            divDomingo.style.border = '1px solid #ccc';
+            divDomingo.style.padding = '15px';
+            divDomingo.style.marginBottom = '20px';
+            divDomingo.style.borderRadius = '8px';
 
-        // Monta a estrutura dentro da div
-        divDomingo.appendChild(titulo);
-        divDomingo.appendChild(infoPresentes);
-        divDomingo.appendChild(infoAusentes);
-        divDomingo.appendChild(infoEnvio);
+            const titulo = document.createElement('h3');
+            titulo.textContent = `Domingo: ${reg.dataTexto}`;
 
-        container.appendChild(divDomingo);
-    });
+            const totalPresentes = reg.presentes.length;
+            const proporcaoPresentes = `${totalPresentes}/${TOTAL_ALUNOS}`;
+            
+            const infoPresentes = document.createElement('p');
+            infoPresentes.innerHTML = `<strong>1. Pessoas presentes:</strong>`;
+
+            const listaPresentesBox = document.createElement('div');
+            listaPresentesBox.style.marginLeft = '10px';
+            listaPresentesBox.style.marginBottom = '10px';
+            if (reg.presentes.length > 0) {
+                reg.presentes.forEach(num => {
+                    const item = document.createElement('p');
+                    item.style.margin = '2px 0';
+                    item.textContent = obterFormatado(num);
+                    listaPresentesBox.appendChild(item);
+                });
+            } else {
+                listaPresentesBox.textContent = 'Nenhum';
+            }
+
+            const infoQtdPresentes = document.createElement('p');
+            infoQtdPresentes.innerHTML = `<strong>2. Proporção de presentes:</strong> ${proporcaoPresentes}`;
+
+            const ausentesNumeros = [];
+            for (let i = 1; i <= TOTAL_ALUNOS; i++) {
+                if (!reg.presentes.includes(String(i))) {
+                    ausentesNumeros.push(i);
+                }
+            }
+
+            const totalAusentes = ausentesNumeros.length;
+            const proporcaoAusentes = `${totalAusentes}/${TOTAL_ALUNOS}`;
+
+            const infoAusentes = document.createElement('p');
+            infoAusentes.innerHTML = `<strong>3. Pessoas ausentes:</strong>`;
+
+            const listaAusentesBox = document.createElement('div');
+            listaAusentesBox.style.marginLeft = '10px';
+            listaAusentesBox.style.marginBottom = '10px';
+            if (ausentesNumeros.length > 0) {
+                ausentesNumeros.forEach(num => {
+                    const item = document.createElement('p');
+                    item.style.margin = '2px 0';
+                    item.textContent = obterFormatado(String(num));
+                    listaAusentesBox.appendChild(item);
+                });
+            } else {
+                listaAusentesBox.textContent = 'Nenhum';
+            }
+
+            const infoQtdAusentes = document.createElement('p');
+            infoQtdAusentes.innerHTML = `<strong>4. Proporção de ausentes:</strong> ${proporcaoAusentes}`;
+
+            const infoEnvio = document.createElement('p');
+            infoEnvio.style.fontSize = '0.85em';
+            infoEnvio.style.color = '#666';
+            infoEnvio.innerHTML = `<em>Enviado em: ${reg.dataHoraEnvio}</em>`;
+
+            const btnExcluir = document.createElement('button');
+            btnExcluir.textContent = 'Excluir Registro';
+            btnExcluir.style.marginTop = '10px';
+            btnExcluir.style.backgroundColor = '#ff6b6b';
+            btnExcluir.style.color = 'white';
+            btnExcluir.style.border = 'none';
+            btnExcluir.style.padding = '8px 12px';
+            btnExcluir.style.borderRadius = '5px';
+            btnExcluir.style.cursor = 'pointer';
+
+            btnExcluir.addEventListener('click', () => {
+                const confirmar = confirm(`Tem certeza que deseja excluir o registro do dia ${reg.dataTexto}?`);
+                if (confirmar) {
+                    let listaAtual = JSON.parse(localStorage.getItem('registrosChamada')) || [];
+                    listaAtual = listaAtual.filter(r => r.dataId !== reg.dataId);
+                    localStorage.setItem('registrosChamada', JSON.stringify(listaAtual));
+                    carregarTelaRegistros();
+                }
+            });
+
+            divDomingo.appendChild(titulo);
+            divDomingo.appendChild(infoPresentes);
+            divDomingo.appendChild(listaPresentesBox);
+            divDomingo.appendChild(infoQtdPresentes);
+            divDomingo.appendChild(infoAusentes);
+            divDomingo.appendChild(listaAusentesBox);
+            divDomingo.appendChild(infoQtdAusentes);
+            divDomingo.appendChild(infoEnvio);
+            divDomingo.appendChild(btnExcluir);
+
+            container.appendChild(divDomingo);
+        });
+    }
+
+    carregarTelaRegistros();
 });
