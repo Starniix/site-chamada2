@@ -41,7 +41,6 @@ function registrarChamada() {
     const selectTurno = document.getElementById('turnoSelect');
     const turnoSelecionado = selectTurno ? selectTurno.value : 'Manhã';
 
-    // Cria um ID único combinando a data e o turno (ex: "2027-01-03-Manhã")
     const idUnico = `${dataSelecionada}-${turnoSelecionado}`;
     const textoCompleto = `${textoData} (${turnoSelecionado})`;
 
@@ -70,7 +69,7 @@ function registrarChamada() {
 
     localStorage.setItem('registrosChamada', JSON.stringify(registrosAntigos));
 
-    alert("Chamada registrada com sucesso para " + listaPresenca.length + " aluno(s) (" + turnoSelecionado + ")!");
+    alert("Chamada registrada com sucesso para " + listaPresenca.length + " nome(s) (" + turnoSelecionado + ")!");
 
     checkboxesMarcados.forEach((caixa) => {
         caixa.checked = false;
