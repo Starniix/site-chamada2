@@ -69,7 +69,7 @@ function registrarChamada() {
 
     localStorage.setItem('registrosChamada', JSON.stringify(registrosAntigos));
 
-    alert("Chamada registrada com sucesso para " + listaPresenca.length + " nome(s) (" + turnoSelecionado + ")!");
+    alert("Chamada registrada com sucesso para " + listaPresenca.length + " (" + turnoSelecionado + ")!");
 
     checkboxesMarcados.forEach((caixa) => {
         caixa.checked = false;
